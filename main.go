@@ -20,6 +20,9 @@ func main() {
 		panic(err)
 	}
 
+	go mapManager(&jogo)
+	go coinSpawner(&jogo)
+
 	// Desenha o estado inicial do jogo
 	interfaceDesenharJogo(&jogo)
 

@@ -29,7 +29,14 @@ var (
 	Parede     = Elemento{'▤', CorParede, CorFundoParede, true}
 	Vegetacao  = Elemento{'♣', CorVerde, CorPadrao, false}
 	Vazio      = Elemento{' ', CorPadrao, CorPadrao, false}
+	Moeda      = Elemento{'¢', CorAmarelo, CorPadrao, false}
+	PortalAtivo = Elemento{'○', CorMagenta, CorPadrao, false}
+	PortalInativo = Elemento{' ', CorPadrao, CorPadrao, false}
 )
+
+var coinChannel = make(chan struct{})
+var mapChannel = make(chan func(*Jogo))
+var gameOverChannel = make(chan struct{})
 
 // Cria e retorna uma nova instância do jogo
 func jogoNovo() Jogo {
@@ -105,4 +112,15 @@ func jogoMoverElemento(jogo *Jogo, x, y, dx, dy int) {
 	jogo.Mapa[y][x] = jogo.UltimoVisitado     // restaura o conteúdo anterior
 	jogo.UltimoVisitado = jogo.Mapa[ny][nx]   // guarda o conteúdo atual da nova posição
 	jogo.Mapa[ny][nx] = elemento              // move o elemento
+}
+
+func mapManager(Jogo *Jogo) {
+	for {
+		select {
+		case cmd := <-mapChannel:
+			cmd(Jogo)
+		case <-gameOverChannel:
+			return
+		}
+	}
 }
