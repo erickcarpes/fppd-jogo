@@ -21,7 +21,8 @@ func main() {
 	}
 
 	go mapManager(&jogo)
-	go coinSpawner(&jogo)
+	go coinManager(&jogo)
+	go portalManager(&jogo)
 
 	// Desenha o estado inicial do jogo
 	interfaceDesenharJogo(&jogo)
