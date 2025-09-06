@@ -29,12 +29,13 @@ var (
 	Parede     = Elemento{'▤', CorParede, CorFundoParede, true}
 	Vegetacao  = Elemento{'♣', CorVerde, CorPadrao, false}
 	Vazio      = Elemento{' ', CorPadrao, CorPadrao, false}
-	Moeda      = Elemento{'¢', CorAmarelo, CorPadrao, false}
+	Moeda      = Elemento{'ၜ', CorAmarelo, CorPadrao, false}
 	PortalAtivo = Elemento{'○', CorMagenta, CorPadrao, false}
-	PortalInativo = Elemento{' ', CorPadrao, CorPadrao, false}
+	PortalInativo = Vazio
 )
 
 var coinChannel = make(chan struct{})
+var portalChannel = make(chan bool)
 var mapChannel = make(chan func(*Jogo))
 var gameOverChannel = make(chan struct{})
 
@@ -109,8 +110,23 @@ func jogoMoverElemento(jogo *Jogo, x, y, dx, dy int) {
 	// Obtem elemento atual na posição
 	elemento := jogo.Mapa[y][x] // guarda o conteúdo atual da posição
 
+	elementoNaNovaPosicao := jogo.Mapa[ny][nx]
+	if elementoNaNovaPosicao.simbolo == Moeda.simbolo {
+		cmd := func(jogo *Jogo) {
+			jogo.Mapa[ny][nx] = Vazio
+		}
+		mapChannel <- cmd
+		jogo.UltimoVisitado = Vazio
+
+		select {
+			case portalChannel <- true:
+			default:
+		}
+	}else{
+		jogo.UltimoVisitado = jogo.Mapa[ny][nx]   // guarda o conteúdo atual da nova posição
+	}
+
 	jogo.Mapa[y][x] = jogo.UltimoVisitado     // restaura o conteúdo anterior
-	jogo.UltimoVisitado = jogo.Mapa[ny][nx]   // guarda o conteúdo atual da nova posição
 	jogo.Mapa[ny][nx] = elemento              // move o elemento
 }
 
