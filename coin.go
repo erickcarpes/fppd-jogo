@@ -7,7 +7,7 @@ func coinManager(jogo *Jogo) {
 	var existingCoin bool = false
 	var posicaoMoedaX, posicaoMoedaY int
 
-	spawnTicker := time.NewTicker(10 * time.Second)
+	spawnTicker := time.NewTicker(5 * time.Second)
 	defer spawnTicker.Stop()
 
 	for {
@@ -17,11 +17,13 @@ func coinManager(jogo *Jogo) {
 				clearCoin(jogo, posicaoMoedaX, posicaoMoedaY)
 				existingCoin = false
 			}
-			spawned, x, y := spawnCoin(jogo)
-			if spawned {
-				existingCoin = true
-				posicaoMoedaX = x
-				posicaoMoedaY = y
+			if !isPortalAtivo() {
+				spawned, x, y := spawnCoin(jogo)
+				if spawned {
+					existingCoin = true
+					posicaoMoedaX = x
+					posicaoMoedaY = y
+				}
 			}
 		case <-gameOverChannel:
 			return
@@ -41,7 +43,7 @@ func spawnCoin(jogo *Jogo) (bool, int, int) {
 		y := rand.Intn(maxY)
 
 		// Verifica se a posição é válida (vazio e não tangível)
-		if !jogo.Mapa[y][x].tangivel && jogo.Mapa[y][x].simbolo != Moeda.simbolo {
+		if !jogo.Mapa[y][x].tangivel && jogo.Mapa[y][x].simbolo == Vazio.simbolo {
 
 			// Escreve o comando atualizando o mapa
 			cmd := func(jogo *Jogo) {

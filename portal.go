@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+var portalConsultaChannel = make(chan chan bool)
+
 func portalManager(jogo *Jogo) {
 	var portalAtivo bool = false
 	var posicaoPortalX, posicaoPortalY int
@@ -25,6 +27,9 @@ func portalManager(jogo *Jogo) {
 						portalAtivo = false
 					}
 				}
+			case resposta := <-portalConsultaChannel:
+				resposta <- portalAtivo
+
 			case <-gameOverChannel:
 				return
 		}
@@ -42,7 +47,7 @@ func ativarPortal(jogo *Jogo) (bool, int, int) {
 		y := rand.Intn(maxY)
 
 		// Verifica se a posição é válida (vazio e não tangível)	
-		if !jogo.Mapa[y][x].tangivel {
+		if !jogo.Mapa[y][x].tangivel && jogo.Mapa[y][x].simbolo == Vazio.simbolo {
 
 			// Escreve o comando atualizando o mapa
 			cmd := func(jogo *Jogo) {
@@ -66,4 +71,24 @@ func clearPortal(jogo *Jogo, x int, y int) {
 		// Envia o comando para o mapManager
 		mapChannel <- cmd
 	}
+}
+
+func teleportarJogador(jogo *Jogo) (int, int) {
+    maxY := len(jogo.Mapa)
+    maxX := len(jogo.Mapa[0])
+
+    for {
+        x := rand.Intn(maxX)
+        y := rand.Intn(maxY)
+
+        if !jogo.Mapa[y][x].tangivel && jogo.Mapa[y][x].simbolo == Vazio.simbolo {
+            return x, y
+        }
+    }
+}
+
+func isPortalAtivo() bool {
+    resposta := make(chan bool)
+    portalConsultaChannel <- resposta
+    return <-resposta
 }

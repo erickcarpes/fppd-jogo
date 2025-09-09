@@ -3,6 +3,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 )
 
@@ -106,28 +107,32 @@ func jogoPodeMoverPara(jogo *Jogo, x, y int) bool {
 // Move um elemento para a nova posição
 func jogoMoverElemento(jogo *Jogo, x, y, dx, dy int) {
 	nx, ny := x+dx, y+dy
-
 	// Obtem elemento atual na posição
-	elemento := jogo.Mapa[y][x] // guarda o conteúdo atual da posição
-
+	elemento := jogo.Mapa[y][x]
 	elementoNaNovaPosicao := jogo.Mapa[ny][nx]
-	if elementoNaNovaPosicao.simbolo == Moeda.simbolo {
-		cmd := func(jogo *Jogo) {
-			jogo.Mapa[ny][nx] = Vazio
-		}
-		mapChannel <- cmd
+	switch elementoNaNovaPosicao.simbolo {
+	case Moeda.simbolo:
+		jogo.Mapa[y][x] = jogo.UltimoVisitado // restaura o conteúdo anterior
 		jogo.UltimoVisitado = Vazio
-
+		jogo.Mapa[ny][nx] = elemento // move o elemento
 		select {
-			case portalChannel <- true:
-			default:
+		case portalChannel <- true:
+		default:
 		}
-	}else{
-		jogo.UltimoVisitado = jogo.Mapa[ny][nx]   // guarda o conteúdo atual da nova posição
+	case PortalAtivo.simbolo:
+		newX, newY := teleportarJogador(jogo)
+		jogo.StatusMsg = fmt.Sprintf("Teletransportado para (%d, %d)!", newX, newY)
+		
+		jogo.Mapa[y][x] = jogo.UltimoVisitado // restaura o conteúdo anterior
+		jogo.Mapa[ny][nx] = Vazio // move o elemento
+		jogo.UltimoVisitado = jogo.Mapa[newY][newX] // guarda o conteúdo atual da nova posição
+		jogo.Mapa[newY][newX] = elemento // move o elemento
+		jogo.PosX, jogo.PosY = newX, newY
+	default:
+		jogo.Mapa[y][x] = jogo.UltimoVisitado // restaura o conteúdo anterior
+		jogo.UltimoVisitado = jogo.Mapa[ny][nx] // guarda o conteúdo atual da nova posição
+		jogo.Mapa[ny][nx] = elemento // move o elemento
 	}
-
-	jogo.Mapa[y][x] = jogo.UltimoVisitado     // restaura o conteúdo anterior
-	jogo.Mapa[ny][nx] = elemento              // move o elemento
 }
 
 func mapManager(Jogo *Jogo) {
