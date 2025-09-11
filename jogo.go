@@ -104,12 +104,13 @@ func jogoPodeMoverPara(jogo *Jogo, x, y int) bool {
 	return true
 }
 
-// Move um elemento para a nova posição
-func jogoMoverElemento(jogo *Jogo, x, y, dx, dy int) {
+// Move um elemento para a nova posição e retorna se houve teletransporte
+func jogoMoverElemento(jogo *Jogo, x, y, dx, dy int) bool {
 	nx, ny := x+dx, y+dy
 	// Obtem elemento atual na posição
 	elemento := jogo.Mapa[y][x]
 	elementoNaNovaPosicao := jogo.Mapa[ny][nx]
+	
 	switch elementoNaNovaPosicao.simbolo {
 	case Moeda.simbolo:
 		jogo.Mapa[y][x] = jogo.UltimoVisitado // restaura o conteúdo anterior
@@ -119,19 +120,33 @@ func jogoMoverElemento(jogo *Jogo, x, y, dx, dy int) {
 		case portalChannel <- true:
 		default:
 		}
+		return false
+		
 	case PortalAtivo.simbolo:
+		// Encontra uma nova posição aleatória para o teletransporte
 		newX, newY := teleportarJogador(jogo)
 		jogo.StatusMsg = fmt.Sprintf("Teletransportado para (%d, %d)!", newX, newY)
 		
+		// Restaura a posição anterior do jogador
 		jogo.Mapa[y][x] = jogo.UltimoVisitado // restaura o conteúdo anterior
-		jogo.Mapa[ny][nx] = Vazio // move o elemento
+		
+		// Remove o portal (ele é consumido)
+		jogo.Mapa[ny][nx] = Vazio
+		
+		// Guarda o elemento da nova posição e coloca o jogador lá
 		jogo.UltimoVisitado = jogo.Mapa[newY][newX] // guarda o conteúdo atual da nova posição
 		jogo.Mapa[newY][newX] = elemento // move o elemento
+		
+		// Atualiza a posição do jogador
 		jogo.PosX, jogo.PosY = newX, newY
+		
+		return true // indica que houve teletransporte
+		
 	default:
 		jogo.Mapa[y][x] = jogo.UltimoVisitado // restaura o conteúdo anterior
 		jogo.UltimoVisitado = jogo.Mapa[ny][nx] // guarda o conteúdo atual da nova posição
 		jogo.Mapa[ny][nx] = elemento // move o elemento
+		return false // movimento normal
 	}
 }
 

@@ -16,8 +16,14 @@ func personagemMover(tecla rune, jogo *Jogo) {
 	nx, ny := jogo.PosX+dx, jogo.PosY+dy
 	// Verifica se o movimento é permitido e realiza a movimentação
 	if jogoPodeMoverPara(jogo, nx, ny) {
-		jogoMoverElemento(jogo, jogo.PosX, jogo.PosY, dx, dy)
-		jogo.PosX, jogo.PosY = nx, ny
+		// jogoMoverElemento retorna true se houve teletransporte
+		teletransportou := jogoMoverElemento(jogo, jogo.PosX, jogo.PosY, dx, dy)
+		
+		// Se não houve teletransporte, atualiza normalmente a posição
+		if !teletransportou {
+			jogo.PosX, jogo.PosY = nx, ny
+		}
+		// Se houve teletransporte, a posição já foi atualizada em jogoMoverElemento
 	}
 }
 
