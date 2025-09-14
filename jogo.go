@@ -17,10 +17,13 @@ type Elemento struct {
 
 // Jogo contém o estado atual do jogo
 type Jogo struct {
-	Mapa           [][]Elemento // grade 2D representando o mapa
-	PosX, PosY     int          // posição atual do personagem
-	UltimoVisitado Elemento     // elemento que estava na posição do personagem antes de mover
-	StatusMsg      string       // mensagem para a barra de status
+	Mapa               [][]Elemento // grade 2D representando o mapa
+	PosX, PosY         int          // posição atual do personagem
+	UltimoVisitado     Elemento     // elemento que estava na posição do personagem antes de mover
+	StatusMsg          string       // mensagem para a barra de status
+	PatoPosX, PatoPosY int          // posição do pato
+	PatoInteragiu      bool         // se o pato foi interagido
+	PatoUltimaPosicao  Elemento
 }
 
 // Elementos visuais do jogo
@@ -33,7 +36,7 @@ var (
 	Moeda         = Elemento{'ၜ', CorAmarelo, CorPadrao, false}
 	PortalAtivo   = Elemento{'○', CorMagenta, CorPadrao, false}
 	PortalInativo = Vazio
-	Cachorro      = Elemento{'ࠎ', CorMarrom, CorPadrao, false}
+	Pato          = Elemento{'ࠎ', CorAzul, CorPadrao, false}
 )
 
 var coinChannel = make(chan struct{})
@@ -72,8 +75,9 @@ func jogoCarregarMapa(nome string, jogo *Jogo) error {
 				e = Vegetacao
 			case Personagem.simbolo:
 				jogo.PosX, jogo.PosY = x, y // registra a posição inicial do personagem
-			case Cachorro.simbolo:
-				e = Cachorro
+			case Pato.simbolo:
+				jogo.PatoPosX, jogo.PatoPosY = x, y
+				e = Pato
 			}
 			linhaElems = append(linhaElems, e)
 		}

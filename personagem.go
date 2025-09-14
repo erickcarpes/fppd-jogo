@@ -35,7 +35,7 @@ func personagemMover(tecla rune, jogo *Jogo) {
 // Neste exemplo, apenas exibe uma mensagem de status
 // Você pode expandir essa função para incluir lógica de interação com objetos
 func personagemInteragir(jogo *Jogo) {
-	interagirComCachorro(jogo)
+	interagirComPato(jogo)
 	// Atualmente apenas exibe uma mensagem de status
 	jogo.StatusMsg = fmt.Sprintf("Interagindo em (%d, %d)", jogo.PosX, jogo.PosY)
 }
