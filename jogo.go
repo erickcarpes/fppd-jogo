@@ -9,30 +9,31 @@ import (
 
 // Elemento representa qualquer objeto do mapa (parede, personagem, vegetação, etc)
 type Elemento struct {
-	simbolo   rune
-	cor       Cor
-	corFundo  Cor
-	tangivel  bool // Indica se o elemento bloqueia passagem
+	simbolo  rune
+	cor      Cor
+	corFundo Cor
+	tangivel bool // Indica se o elemento bloqueia passagem
 }
 
 // Jogo contém o estado atual do jogo
 type Jogo struct {
-	Mapa            [][]Elemento // grade 2D representando o mapa
-	PosX, PosY      int          // posição atual do personagem
-	UltimoVisitado  Elemento     // elemento que estava na posição do personagem antes de mover
-	StatusMsg       string       // mensagem para a barra de status
+	Mapa           [][]Elemento // grade 2D representando o mapa
+	PosX, PosY     int          // posição atual do personagem
+	UltimoVisitado Elemento     // elemento que estava na posição do personagem antes de mover
+	StatusMsg      string       // mensagem para a barra de status
 }
 
 // Elementos visuais do jogo
 var (
-	Personagem = Elemento{'☺', CorCinzaEscuro, CorPadrao, true}
-	Inimigo    = Elemento{'☠', CorVermelho, CorPadrao, true}
-	Parede     = Elemento{'▤', CorParede, CorFundoParede, true}
-	Vegetacao  = Elemento{'♣', CorVerde, CorPadrao, false}
-	Vazio      = Elemento{' ', CorPadrao, CorPadrao, false}
-	Moeda      = Elemento{'ၜ', CorAmarelo, CorPadrao, false}
-	PortalAtivo = Elemento{'○', CorMagenta, CorPadrao, false}
+	Personagem    = Elemento{'☺', CorCinzaEscuro, CorPadrao, true}
+	Inimigo       = Elemento{'☠', CorVermelho, CorPadrao, true}
+	Parede        = Elemento{'▤', CorParede, CorFundoParede, true}
+	Vegetacao     = Elemento{'♣', CorVerde, CorPadrao, false}
+	Vazio         = Elemento{' ', CorPadrao, CorPadrao, false}
+	Moeda         = Elemento{'ၜ', CorAmarelo, CorPadrao, false}
+	PortalAtivo   = Elemento{'○', CorMagenta, CorPadrao, false}
 	PortalInativo = Vazio
+	Cachorro      = Elemento{'ࠎ', CorMarrom, CorPadrao, false}
 )
 
 var coinChannel = make(chan struct{})
@@ -71,6 +72,8 @@ func jogoCarregarMapa(nome string, jogo *Jogo) error {
 				e = Vegetacao
 			case Personagem.simbolo:
 				jogo.PosX, jogo.PosY = x, y // registra a posição inicial do personagem
+			case Cachorro.simbolo:
+				e = Cachorro
 			}
 			linhaElems = append(linhaElems, e)
 		}
@@ -110,7 +113,7 @@ func jogoMoverElemento(jogo *Jogo, x, y, dx, dy int) bool {
 	// Obtem elemento atual na posição
 	elemento := jogo.Mapa[y][x]
 	elementoNaNovaPosicao := jogo.Mapa[ny][nx]
-	
+
 	switch elementoNaNovaPosicao.simbolo {
 	case Moeda.simbolo:
 		jogo.Mapa[y][x] = jogo.UltimoVisitado // restaura o conteúdo anterior
@@ -121,32 +124,32 @@ func jogoMoverElemento(jogo *Jogo, x, y, dx, dy int) bool {
 		default:
 		}
 		return false
-		
+
 	case PortalAtivo.simbolo:
 		// Encontra uma nova posição aleatória para o teletransporte
 		newX, newY := teleportarJogador(jogo)
 		jogo.StatusMsg = fmt.Sprintf("Teletransportado para (%d, %d)!", newX, newY)
-		
+
 		// Restaura a posição anterior do jogador
 		jogo.Mapa[y][x] = jogo.UltimoVisitado // restaura o conteúdo anterior
-		
+
 		// Remove o portal (ele é consumido)
 		jogo.Mapa[ny][nx] = Vazio
-		
+
 		// Guarda o elemento da nova posição e coloca o jogador lá
 		jogo.UltimoVisitado = jogo.Mapa[newY][newX] // guarda o conteúdo atual da nova posição
-		jogo.Mapa[newY][newX] = elemento // move o elemento
-		
+		jogo.Mapa[newY][newX] = elemento            // move o elemento
+
 		// Atualiza a posição do jogador
 		jogo.PosX, jogo.PosY = newX, newY
-		
+
 		return true // indica que houve teletransporte
-		
+
 	default:
-		jogo.Mapa[y][x] = jogo.UltimoVisitado // restaura o conteúdo anterior
+		jogo.Mapa[y][x] = jogo.UltimoVisitado   // restaura o conteúdo anterior
 		jogo.UltimoVisitado = jogo.Mapa[ny][nx] // guarda o conteúdo atual da nova posição
-		jogo.Mapa[ny][nx] = elemento // move o elemento
-		return false // movimento normal
+		jogo.Mapa[ny][nx] = elemento            // move o elemento
+		return false                            // movimento normal
 	}
 }
 
