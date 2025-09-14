@@ -23,6 +23,7 @@ func main() {
 	go mapManager(&jogo)
 	go coinManager(&jogo)
 	go portalManager(&jogo)
+	go cachorroManager(&jogo)
 
 	// Desenha o estado inicial do jogo
 	interfaceDesenharJogo(&jogo)
