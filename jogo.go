@@ -23,7 +23,6 @@ type Jogo struct {
 	StatusMsg          string       // mensagem para a barra de status
 	PatoPosX, PatoPosY int          // posição do pato
 	PatoInteragiu      bool         // se o pato foi interagido
-	PatoUltimaPosicao  Elemento
 }
 
 // Elementos visuais do jogo
@@ -39,7 +38,6 @@ var (
 	Pato          = Elemento{'ࠎ', CorAzul, CorPadrao, false}
 )
 
-var coinChannel = make(chan struct{})
 var portalChannel = make(chan bool)
 var mapChannel = make(chan func(*Jogo))
 var gameOverChannel = make(chan struct{})

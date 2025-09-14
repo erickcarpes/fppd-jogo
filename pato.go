@@ -27,9 +27,7 @@ func moverPato(jogo *Jogo) {
 	}
 
 	patoPosX, patoPosY := jogo.PatoPosX, jogo.PatoPosY
-
-	dx := -1 // Move para cima
-	novoY := patoPosY + dx
+	novoY := patoPosY - 1
 
 	// Verifica se a nova posição é válida
 	if novoY >= 0 && novoY < len(jogo.Mapa) && novoY >= 0 && novoY < len(jogo.Mapa[novoY]) {
@@ -59,4 +57,12 @@ func interagirComPato(jogo *Jogo) {
 		}
 		mapChannel <- cmd
 	}
+}
+
+func resetarPatoParaPortal(jogo *Jogo) {
+	cmd := func(jogo *Jogo) {
+		jogo.PatoInteragiu = false
+		jogo.StatusMsg = "O portal se abriu! O pato começou a se mover novamente."
+	}
+	mapChannel <- cmd
 }
