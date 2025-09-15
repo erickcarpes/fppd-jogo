@@ -79,7 +79,6 @@ func jogoCarregarMapa(nome string, jogo *Jogo) error {
 			case Pato.simbolo:
 				jogo.PatoPosX, jogo.PatoPosY = x, y
 				jogo.PatoUltimoVisitado = Vazio
-				jogo.StatusMsg = fmt.Sprintf("Posição inicial do pato registrada: (%d, %d)", jogo.PatoPosX, jogo.PatoPosY)
 				e = Pato
 			}
 			linhaElems = append(linhaElems, e)
@@ -138,13 +137,11 @@ func jogoMoverElemento(jogo *Jogo, x, y, dx, dy int) bool {
 		jogo.PatoInteragiu = true
 		jogo.StatusMsg = fmt.Sprintf("Teletransportado para (%d, %d)!", newX, newY)
 
-		// Restaura a posição anterior do jogador
 		jogo.Mapa[y][x] = jogo.UltimoVisitado // restaura o conteúdo anterior
 
 		// Remove o portal (ele é consumido)
 		jogo.Mapa[ny][nx] = Vazio
 
-		// Guarda o elemento da nova posição e coloca o jogador lá
 		jogo.UltimoVisitado = jogo.Mapa[newY][newX] // guarda o conteúdo atual da nova posição
 		jogo.Mapa[newY][newX] = elemento            // move o elemento
 
