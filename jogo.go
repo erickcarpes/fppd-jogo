@@ -23,6 +23,7 @@ type Jogo struct {
 	StatusMsg          string       // mensagem para a barra de status
 	PatoPosX, PatoPosY int          // posição do pato
 	PatoInteragiu      bool         // se o pato foi interagido
+	PatoUltimoVisitado Elemento
 	PortalAtivo        bool
 }
 
@@ -36,7 +37,7 @@ var (
 	Moeda         = Elemento{'ၜ', CorAmarelo, CorPadrao, false}
 	PortalAtivo   = Elemento{'○', CorMagenta, CorPadrao, false}
 	PortalInativo = Vazio
-	Pato          = Elemento{'p', CorAzul, CorPadrao, false}
+	Pato          = Elemento{'ࠎ', CorAzul, CorPadrao, true}
 )
 
 var portalChannel = make(chan bool)
@@ -47,7 +48,7 @@ var gameOverChannel = make(chan struct{})
 func jogoNovo() Jogo {
 	// O ultimo elemento visitado é inicializado como vazio
 	// pois o jogo começa com o personagem em uma posição vazia
-	return Jogo{UltimoVisitado: Vazio}
+	return Jogo{UltimoVisitado: Vazio, PatoUltimoVisitado: Vazio}
 }
 
 // Lê um arquivo texto linha por linha e constrói o mapa do jogo
@@ -77,6 +78,7 @@ func jogoCarregarMapa(nome string, jogo *Jogo) error {
 				jogo.PosX, jogo.PosY = x, y // registra a posição inicial do personagem
 			case Pato.simbolo:
 				jogo.PatoPosX, jogo.PatoPosY = x, y
+				jogo.PatoUltimoVisitado = Vazio
 				jogo.StatusMsg = fmt.Sprintf("Posição inicial do pato registrada: (%d, %d)", jogo.PatoPosX, jogo.PatoPosY)
 				e = Pato
 			}

@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-var renderChannel = make(chan struct{}, 1)
+var renderChannel = make(chan struct{})
 
 func main() {
 	// Inicializa a interface (termbox)

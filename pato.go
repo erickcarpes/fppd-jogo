@@ -49,9 +49,11 @@ func moverPato(jogo *Jogo) {
 
 	// Verifica se a nova posição é válida
 	if novoY >= 0 && novoY < len(jogo.Mapa) && novoY >= 0 && novoY < len(jogo.Mapa[novoY]) {
-		if !jogo.Mapa[novoY][patoPosX].tangivel && jogo.Mapa[novoY][patoPosX].simbolo != Personagem.simbolo {
+		if !jogo.Mapa[novoY][patoPosX].tangivel {
 			// Remove o pato da posição atual
-			jogo.Mapa[jogo.PatoPosY][jogo.PatoPosX] = Vazio
+			jogo.Mapa[jogo.PatoPosY][jogo.PatoPosX] = jogo.PatoUltimoVisitado
+
+			jogo.PatoUltimoVisitado = jogo.Mapa[novoY][patoPosX]
 			// Coloca o pato na nova posição
 			jogo.Mapa[novoY][patoPosX] = Pato
 			// Atualiza a posição do pato no estado
