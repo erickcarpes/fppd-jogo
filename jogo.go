@@ -23,6 +23,7 @@ type Jogo struct {
 	StatusMsg          string       // mensagem para a barra de status
 	PatoPosX, PatoPosY int          // posição do pato
 	PatoInteragiu      bool         // se o pato foi interagido
+	PortalAtivo        bool
 }
 
 // Elementos visuais do jogo
@@ -62,7 +63,8 @@ func jogoCarregarMapa(nome string, jogo *Jogo) error {
 	for scanner.Scan() {
 		linha := scanner.Text()
 		var linhaElems []Elemento
-		for x, ch := range linha {
+		runes := []rune(linha)
+		for x, ch := range runes {
 			e := Vazio
 			switch ch {
 			case Parede.simbolo:
@@ -131,6 +133,7 @@ func jogoMoverElemento(jogo *Jogo, x, y, dx, dy int) bool {
 	case PortalAtivo.simbolo:
 		// Encontra uma nova posição aleatória para o teletransporte
 		newX, newY := teleportarJogador(jogo)
+		jogo.PatoInteragiu = true
 		jogo.StatusMsg = fmt.Sprintf("Teletransportado para (%d, %d)!", newX, newY)
 
 		// Restaura a posição anterior do jogador

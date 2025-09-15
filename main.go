@@ -1,7 +1,12 @@
 // main.go - Loop principal do jogo
 package main
 
-import "os"
+import (
+	"os"
+	"time"
+)
+
+var renderChannel = make(chan struct{}, 1)
 
 func main() {
 	// Inicializa a interface (termbox)
@@ -24,6 +29,7 @@ func main() {
 	go coinManager(&jogo)
 	go portalManager(&jogo)
 	go patoManager(&jogo)
+	go renderManager(&jogo)
 
 	// Desenha o estado inicial do jogo
 	interfaceDesenharJogo(&jogo)
@@ -34,6 +40,29 @@ func main() {
 		if continuar := personagemExecutarAcao(evento, &jogo); !continuar {
 			break
 		}
-		interfaceDesenharJogo(&jogo)
+
+		select {
+		case renderChannel <- struct{}{}:
+		default:
+		}
+	}
+}
+
+func renderManager(jogo *Jogo) {
+	// Timer para render automático a cada 100ms
+	renderTicker := time.NewTicker(100 * time.Millisecond)
+	defer renderTicker.Stop()
+
+	for {
+		select {
+		case <-renderTicker.C:
+			interfaceDesenharJogo(jogo)
+
+		case <-renderChannel:
+			interfaceDesenharJogo(jogo)
+
+		case <-gameOverChannel:
+			return
+		}
 	}
 }

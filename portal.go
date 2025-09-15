@@ -5,33 +5,35 @@ import (
 	"time"
 )
 
-var portalConsultaChannel = make(chan chan bool)
-
 func portalManager(jogo *Jogo) {
-	var portalAtivo bool = false
 	var posicaoPortalX, posicaoPortalY int
 
 	for {
 		select {
 		case ativar := <-portalChannel:
-			if ativar && !portalAtivo {
-				portalAtivo, posicaoPortalX, posicaoPortalY = ativarPortal(jogo)
+			if ativar {
+				cmd := func(jogo *Jogo) {
+					if !jogo.PortalAtivo {
+						var x, y int
+						jogo.PortalAtivo, x, y = ativarPortal(jogo)
+						posicaoPortalX, posicaoPortalY = x, y
 
-				jogo.PatoInteragiu = false
-
-				go func() {
-					time.Sleep(15 * time.Second)
-					portalChannel <- false
-				}()
-			} else {
-				if portalAtivo {
-					clearPortal(jogo, posicaoPortalX, posicaoPortalY)
-					portalAtivo = false
+						go func() {
+							time.Sleep(15 * time.Second)
+							portalChannel <- false
+						}()
+					}
 				}
+				mapChannel <- cmd
+			} else {
+				cmd := func(jogo *Jogo) {
+					if jogo.PortalAtivo {
+						clearPortal(jogo, posicaoPortalX, posicaoPortalY)
+						jogo.PortalAtivo = false
+					}
+				}
+				mapChannel <- cmd
 			}
-		case resposta := <-portalConsultaChannel:
-			resposta <- portalAtivo
-
 		case <-gameOverChannel:
 			return
 		}
@@ -51,13 +53,8 @@ func ativarPortal(jogo *Jogo) (bool, int, int) {
 		// Verifica se a posição é válida (vazio e não tangível)
 		if !jogo.Mapa[y][x].tangivel && jogo.Mapa[y][x].simbolo == Vazio.simbolo {
 
-			// Escreve o comando atualizando o mapa
-			cmd := func(jogo *Jogo) {
-				jogo.Mapa[y][x] = PortalAtivo
-			}
-			// Envia o comando para o mapManager
-			mapChannel <- cmd
-			// Retorna a posição onde o portal foi spawnado
+			jogo.Mapa[y][x] = PortalAtivo
+			jogo.PatoInteragiu = false
 			return true, x, y
 		}
 	}
@@ -66,12 +63,8 @@ func ativarPortal(jogo *Jogo) (bool, int, int) {
 func clearPortal(jogo *Jogo, x int, y int) {
 	// Verifica se ainda há um portal na posição
 	if jogo.Mapa[y][x].simbolo == PortalAtivo.simbolo {
-		// Escreve o comando atualizando o mapa
-		cmd := func(jogo *Jogo) {
-			jogo.Mapa[y][x] = PortalInativo
-		}
-		// Envia o comando para o mapManager
-		mapChannel <- cmd
+		jogo.Mapa[y][x] = PortalInativo
+		jogo.PatoInteragiu = true
 	}
 }
 
@@ -87,10 +80,4 @@ func teleportarJogador(jogo *Jogo) (int, int) {
 			return x, y
 		}
 	}
-}
-
-func isPortalAtivo() bool {
-	resposta := make(chan bool)
-	portalConsultaChannel <- resposta
-	return <-resposta
 }
