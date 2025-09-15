@@ -1,7 +1,9 @@
 package main
 
-import "time"
-import "math/rand"
+import (
+	"math/rand"
+	"time"
+)
 
 func coinManager(jogo *Jogo) {
 	var existingCoin bool = false
@@ -17,7 +19,7 @@ func coinManager(jogo *Jogo) {
 				clearCoin(jogo, posicaoMoedaX, posicaoMoedaY)
 				existingCoin = false
 			}
-			if !isPortalAtivo() {
+			if !jogo.PortalAtivo {
 				spawned, x, y := spawnCoin(jogo)
 				if spawned {
 					existingCoin = true
@@ -35,7 +37,7 @@ func spawnCoin(jogo *Jogo) (bool, int, int) {
 
 	maxY := len(jogo.Mapa)
 	maxX := len(jogo.Mapa[0])
-	
+
 	// Tenta spawnar a moeda indefinidamente até achar uma posição válida
 	for {
 		// Gera uma posição aleatória para x e y
@@ -49,7 +51,7 @@ func spawnCoin(jogo *Jogo) (bool, int, int) {
 			cmd := func(jogo *Jogo) {
 				jogo.Mapa[y][x] = Moeda
 			}
-			
+
 			// Envia o comando para o mapManager
 			mapChannel <- cmd
 			// Retorna a posição onde a moeda foi spawnada
