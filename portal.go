@@ -17,7 +17,7 @@ func portalManager(jogo *Jogo) {
 			if ativar && !portalAtivo {
 				portalAtivo, posicaoPortalX, posicaoPortalY = ativarPortal(jogo)
 
-				resetarPatoParaPortal(jogo)
+				jogo.PatoInteragiu = false
 
 				go func() {
 					time.Sleep(15 * time.Second)

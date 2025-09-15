@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math"
 	"time"
 )
@@ -22,11 +23,9 @@ func patoManager(jogo *Jogo) {
 }
 
 func moverPato(jogo *Jogo) {
-	if jogo.PatoInteragiu {
-		return
-	}
 
 	patoPosX, patoPosY := jogo.PatoPosX, jogo.PatoPosY
+	fmt.Printf("Pato está em (%d, %d)\n", patoPosX, patoPosY)
 	novoY := patoPosY - 1
 
 	// Verifica se a nova posição é válida

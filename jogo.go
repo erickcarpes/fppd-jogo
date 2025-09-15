@@ -35,7 +35,7 @@ var (
 	Moeda         = Elemento{'ၜ', CorAmarelo, CorPadrao, false}
 	PortalAtivo   = Elemento{'○', CorMagenta, CorPadrao, false}
 	PortalInativo = Vazio
-	Pato          = Elemento{'ࠎ', CorAzul, CorPadrao, false}
+	Pato          = Elemento{'p', CorAzul, CorPadrao, false}
 )
 
 var portalChannel = make(chan bool)
@@ -75,6 +75,7 @@ func jogoCarregarMapa(nome string, jogo *Jogo) error {
 				jogo.PosX, jogo.PosY = x, y // registra a posição inicial do personagem
 			case Pato.simbolo:
 				jogo.PatoPosX, jogo.PatoPosY = x, y
+				jogo.StatusMsg = fmt.Sprintf("Posição inicial do pato registrada: (%d, %d)", jogo.PatoPosX, jogo.PatoPosY)
 				e = Pato
 			}
 			linhaElems = append(linhaElems, e)
